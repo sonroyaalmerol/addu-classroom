@@ -23,22 +23,10 @@ export default function ClassCard({ classId, classTitle, classCode, classProf, c
   const [deadlines, setDeadlines] = React.useState([]);
 
   React.useEffect(() => {
-    fetch(`https://daigler20.addu.edu.ph/webservice/rest/server.php?wstoken=94af31d03904c082e05c8066bc504e55&wsfunction=core_course_get_contents&courseid=${classId}&moodlewsrestformat=json`)
+    fetch(`https://daigler20.addu.edu.ph/webservice/rest/server.php?wstoken=94af31d03904c082e05c8066bc504e55&wsfunction=mod_assign_get_assignments&moodlewsrestformat=json&courseids[0]=${classId}`)
       .then(response => response.json())
       .then(data => {
-        const includedMods = ['assign', 'quiz'];
-        data.forEach((section) => {
-          section.modules.forEach((module) => {
-            if (module.completion === 0 && includedMods.includes(module.modname)) {
-              setDeadlines((prev) => {
-                if (!prev.find((x) => x.id === module.id)) {
-                  return [...prev, module];
-                }
-                return prev;
-              });
-            }
-          })
-        })
+        setDeadlines(data.courses[0].assignments)
       })
   }, [classId])
 
@@ -54,9 +42,9 @@ export default function ClassCard({ classId, classTitle, classCode, classProf, c
         />
         <CardContent style={{ height: 170 }}>
           <ul style={{ margin: 0 }}>
-            { deadlines.map((deadline) => (
+            { deadlines.map((deadline) => deadline.completionsubmit !== 1 ? (
               <Typography key={deadline.id} variant="body2" component="li">{deadline.name}</Typography>
-            )) }
+            ) : null) }
           </ul>
         </CardContent>
       </CardActionArea>
